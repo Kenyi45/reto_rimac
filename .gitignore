@@ -1,0 +1,216 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+.coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# TypeScript compiled output
+dist/
+build/
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+
+# IDE/Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Serverless directories
+.serverless/
+.serverless_nextjs/
+
+# AWS SAM
+.aws-sam/
+
+# Webpack
+.webpack/
+
+# ESLint cache
+.eslintcache
+
+# Prettier
+.prettierignore
+
+# Jest
+jest.config.js.bak
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+
+# Coverage reports
+coverage
+.coverage
+
+# Dependency lock files (keep one, remove others)
+# package-lock.json
+# yarn.lock
+
+# Local development
+.env.development
+.env.local
+
+# Production
+.env.production
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Serverless Framework
+.serverless
+
+# AWS CloudFormation templates
+cloudformation-template-*.json
+sam-template.yaml
+
+# Local DynamoDB
+.dynamodb/
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# Docker
+Dockerfile.local
+docker-compose.override.yml
+
+# Temporary files
+tmp/
+temp/
+
+# Cache
+.cache/
+
+# AWS credentials (never commit these)
+.aws/
+aws-exports.js
+
+# Local SSL certificates
+*.pem
+*.key
+*.crt
+
+# Backup files
+*.bak
+*.backup
+
+# Performance monitoring
+.clinic/
+
+# Documentation build
+docs/build/
+
+# MacOS
+.AppleDouble
+.LSOverride
+
+# Windows
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.nfs*
+
+# JetBrains IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+
+# Archive files
+*.zip
+*.tar.gz
+*.rar
+
+# Test artifacts
+test-results/
+e2e-results/
+
+# API keys and sensitive data
+secrets.json
+config/secrets.json
+.secrets
+
+# Build artifacts
+*.map
+*.min.js
+*.min.css
+
+# CDK
+cdk.out/
+
+# Custom
+local-test-data/
+temp-scripts/ 

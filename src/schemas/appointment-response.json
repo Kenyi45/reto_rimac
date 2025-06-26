@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "title": "AppointmentResponse",
+  "description": "Respuesta al crear una nueva cita médica",
+  "required": [
+    "success",
+    "message"
+  ],
+  "properties": {
+    "success": {
+      "type": "boolean",
+      "description": "Indica si la operación fue exitosa"
+    },
+    "message": {
+      "type": "string",
+      "description": "Mensaje descriptivo del resultado"
+    },
+    "data": {
+      "type": "object",
+      "description": "Datos de la cita creada (solo presente si success es true)",
+      "properties": {
+        "appointmentId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "ID único de la cita médica creada"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "processing", "completed", "failed"],
+          "description": "Estado actual de la cita"
+        }
+      },
+      "additionalProperties": false
+    },
+    "error": {
+      "type": "string",
+      "description": "Mensaje de error (solo presente si success es false)"
+    }
+  },
+  "additionalProperties": false
+} 

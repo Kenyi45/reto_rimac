@@ -1,0 +1,104 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "title": "AppointmentListResponse",
+  "description": "Respuesta con la lista de citas médicas de un asegurado",
+  "required": [
+    "success",
+    "data",
+    "total"
+  ],
+  "properties": {
+    "success": {
+      "type": "boolean",
+      "description": "Indica si la operación fue exitosa"
+    },
+    "data": {
+      "type": "array",
+      "description": "Lista de citas médicas del asegurado",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID único de la cita médica"
+          },
+          "insuredId": {
+            "type": "string",
+            "pattern": "^\\d{5}$",
+            "description": "Código del asegurado"
+          },
+          "scheduleId": {
+            "type": "integer",
+            "description": "ID del horario de la cita"
+          },
+          "countryISO": {
+            "type": "string",
+            "enum": ["PE", "CL"],
+            "description": "Código del país"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "processing", "completed", "failed"],
+            "description": "Estado actual de la cita"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Fecha y hora de creación"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Fecha y hora de última actualización"
+          },
+          "schedule": {
+            "type": "object",
+            "description": "Información detallada del horario (opcional)",
+            "properties": {
+              "scheduleId": {
+                "type": "integer",
+                "description": "ID del horario"
+              },
+              "centerId": {
+                "type": "integer",
+                "description": "ID del centro médico"
+              },
+              "specialtyId": {
+                "type": "integer",
+                "description": "ID de la especialidad"
+              },
+              "medicId": {
+                "type": "integer",
+                "description": "ID del médico"
+              },
+              "date": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Fecha y hora de la cita"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "insuredId",
+          "scheduleId",
+          "countryISO",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Número total de citas encontradas"
+    }
+  },
+  "additionalProperties": false
+} 

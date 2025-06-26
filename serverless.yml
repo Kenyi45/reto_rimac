@@ -1,0 +1,425 @@
+service: rimac-appointment-backend
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  memorySize: 256
+  timeout: 30
+  logRetentionInDays: 14
+  # VPC Configuration - Temporarily disabled until we get the values
+  # vpc:
+  #   securityGroupIds:
+  #     - ${env:SECURITY_GROUP_ID}
+  #   subnetIds:
+  #     - ${env:SUBNET_ID_1}
+  #     - ${env:SUBNET_ID_2}
+  
+  environment:
+    STAGE: ${self:provider.stage}
+    REGION: ${self:provider.region}
+    APPOINTMENTS_TABLE: ${self:service}-${self:provider.stage}-appointment
+    SNS_TOPIC_PE: ${self:service}-appointments-pe-${self:provider.stage}
+    SNS_TOPIC_CL: ${self:service}-appointments-cl-${self:provider.stage}
+    SQS_PE: ${self:service}-appointments-pe-queue-${self:provider.stage}
+    SQS_CL: ${self:service}-appointments-cl-queue-${self:provider.stage}
+    SQS_CONFIRMATION: ${self:service}-confirmation-queue-${self:provider.stage}
+    EVENT_BRIDGE_BUS: ${self:service}-appointment-bus-${self:provider.stage}
+    ERROR_TOPIC_ARN:
+      Ref: ErrorNotificationsTopic
+    RDS_PE_HOST: ${env:RDS_PE_HOST, 'rimac-appointments-pe.co7akgo2wk7o.us-east-1.rds.amazonaws.com'}
+    RDS_PE_USER: ${env:RDS_PE_USER, 'admin'}
+    RDS_PE_PASSWORD: ${env:RDS_PE_PASSWORD, 'TuPasswordSeguro123!'}
+    RDS_PE_DATABASE: ${env:RDS_PE_DATABASE, 'appointments_pe'}
+    RDS_CL_HOST: ${env:RDS_CL_HOST, 'rimac-appointments-cl.co7akgo2wk7o.us-east-1.rds.amazonaws.com'}
+    RDS_CL_USER: ${env:RDS_CL_USER, 'admin'}
+    RDS_CL_PASSWORD: ${env:RDS_CL_PASSWORD, 'TuPasswordSeguro123!'}
+    RDS_CL_DATABASE: ${env:RDS_CL_DATABASE, 'appointments_cl'}
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - Fn::GetAtt: [AppointmentsTable, Arn]
+            - Fn::Join:
+              - '/'
+              - - Fn::GetAtt: [AppointmentsTable, Arn]
+                - '*'
+        - Effect: Allow
+          Action:
+            - sns:Publish
+          Resource:
+            - Ref: AppointmentTopicPE
+            - Ref: AppointmentTopicCL
+            - Ref: ErrorNotificationsTopic
+        - Effect: Allow
+          Action:
+            - sqs:SendMessage
+            - sqs:ReceiveMessage
+            - sqs:DeleteMessage
+            - sqs:GetQueueAttributes
+          Resource:
+            - Fn::GetAtt: [AppointmentQueuePE, Arn]
+            - Fn::GetAtt: [AppointmentQueueCL, Arn]
+            - Fn::GetAtt: [ConfirmationQueue, Arn]
+        - Effect: Allow
+          Action:
+            - events:PutEvents
+          Resource:
+            - Fn::GetAtt: [AppointmentEventBridge, Arn]
+        - Effect: Allow
+          Action:
+            - ec2:CreateNetworkInterface
+            - ec2:DescribeNetworkInterfaces
+            - ec2:DeleteNetworkInterface
+            - ec2:AttachNetworkInterface
+            - ec2:DetachNetworkInterface
+          Resource: "*"
+
+plugins:
+  - serverless-dotenv-plugin
+  # - serverless-aws-documentation  # Temporalmente deshabilitado por error de deploy
+  # - serverless-esbuild  # Comentado temporalmente
+  # - serverless-offline  # Comentado temporalmente por incompatibilidad con Node.js 22
+  # - serverless-openapi-documentation  # Comentado temporalmente
+
+package:
+  patterns:
+    - 'appointment.js'
+    - 'appointmentPE.js'
+    - 'appointmentCL.js'
+    - 'documentation.js'
+    - 'dist/**'
+    - 'package.json'
+  exclude:
+    - 'src/**'
+    - 'node_modules/@types/**'
+    - 'node_modules/typescript/**'
+    - 'node_modules/jest/**'
+    - 'node_modules/eslint/**'
+    - 'node_modules/@typescript-eslint/**'
+    - 'node_modules/serverless/**'
+    - 'node_modules/serverless-*/**'
+    - '**/*.test.*'
+    - '**/*.spec.*'
+    - '__tests__/**'
+    - 'coverage/**'
+    - '.git/**'
+    - '.vscode/**'
+    - '*.md'
+    - 'tsconfig.json'
+    - 'jest.config.js'
+    - '.eslintrc.js'
+
+custom:
+  # esbuild:
+  #   bundle: true
+  #   minify: false
+  #   sourcemap: true
+  #   exclude: ['aws-sdk']
+  #   target: 'node18'
+  #   platform: 'node'
+  #   format: cjs
+  #   keepNames: true
+
+  # documentation:  # Temporalmente deshabilitado por error de deploy
+  #   api:
+  #     info:
+  #       version: '1.0.0'
+  #       title: 'Rimac Appointment API'
+  #       description: 'Sistema de agendamiento de citas médicas para asegurados'
+  #       contact:
+  #         name: 'Rimac Backend Team'
+  #       license:
+  #         name: 'MIT'
+  #   models:
+  #     - name: AppointmentRequest
+  #       contentType: application/json
+  #       schema: ${file(src/schemas/appointment-request.json)}
+  #     - name: AppointmentResponse
+  #       contentType: application/json
+  #       schema: ${file(src/schemas/appointment-response.json)}
+  #     - name: AppointmentListResponse
+  #       contentType: application/json
+  #       schema: ${file(src/schemas/appointment-list-response.json)}
+
+functions:
+  appointment:
+    handler: appointment.handler
+    runtime: nodejs18.x
+    events:
+      - http:
+          path: /appointment
+          method: post
+          cors: true
+      - http:
+          path: /appointment/{insuredId}
+          method: get
+          cors: true
+      - sqs:
+          arn:
+            Fn::GetAtt: [ConfirmationQueue, Arn]
+          batchSize: 10
+
+  documentation:
+    handler: documentation.handler
+    runtime: nodejs18.x
+    events:
+      - http:
+          path: /docs
+          method: get
+          cors: true
+
+  appointmentPE:
+    handler: appointmentPE.handler
+    runtime: nodejs18.x
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt: [AppointmentQueuePE, Arn]
+          batchSize: 10
+
+  appointmentCL:
+    handler: appointmentCL.handler
+    runtime: nodejs18.x
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt: [AppointmentQueueCL, Arn]
+          batchSize: 10
+
+resources:
+  Resources:
+    # DynamoDB Table
+    AppointmentsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.APPOINTMENTS_TABLE}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: insuredId
+            AttributeType: S
+          - AttributeName: createdAt
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: InsuredIdIndex
+            KeySchema:
+              - AttributeName: insuredId
+                KeyType: HASH
+              - AttributeName: createdAt
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
+
+    # SNS Topics
+    AppointmentTopicPE:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: ${self:provider.environment.SNS_TOPIC_PE}
+        DisplayName: 'Appointment Topic Peru'
+
+    AppointmentTopicCL:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: ${self:provider.environment.SNS_TOPIC_CL}
+        DisplayName: 'Appointment Topic Chile'
+
+    ErrorNotificationsTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: 'error-notifications'
+        DisplayName: 'Error Notifications Topic'
+
+    # SQS Queues
+    AppointmentQueuePE:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:provider.environment.SQS_PE}
+        VisibilityTimeout: 180
+        MessageRetentionPeriod: 1209600 # 14 days
+        RedrivePolicy:
+          deadLetterTargetArn:
+            Fn::GetAtt: [AppointmentDLQPE, Arn]
+          maxReceiveCount: 3
+
+    AppointmentQueueCL:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:provider.environment.SQS_CL}
+        VisibilityTimeout: 180
+        MessageRetentionPeriod: 1209600 # 14 days
+        RedrivePolicy:
+          deadLetterTargetArn:
+            Fn::GetAtt: [AppointmentDLQCL, Arn]
+          maxReceiveCount: 3
+
+    ConfirmationQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:provider.environment.SQS_CONFIRMATION}
+        VisibilityTimeout: 180
+        MessageRetentionPeriod: 1209600 # 14 days
+        RedrivePolicy:
+          deadLetterTargetArn:
+            Fn::GetAtt: [ConfirmationDLQ, Arn]
+          maxReceiveCount: 3
+
+    # Dead Letter Queues
+    AppointmentDLQPE:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:provider.environment.SQS_PE}-dlq
+
+    AppointmentDLQCL:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:provider.environment.SQS_CL}-dlq
+
+    ConfirmationDLQ:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:provider.environment.SQS_CONFIRMATION}-dlq
+
+    # SNS to SQS Subscriptions
+    AppointmentSubscriptionPE:
+      Type: AWS::SNS::Subscription
+      Properties:
+        TopicArn:
+          Ref: AppointmentTopicPE
+        Protocol: sqs
+        Endpoint:
+          Fn::GetAtt: [AppointmentQueuePE, Arn]
+        FilterPolicy:
+          countryISO: ["PE"]
+
+    AppointmentSubscriptionCL:
+      Type: AWS::SNS::Subscription
+      Properties:
+        TopicArn:
+          Ref: AppointmentTopicCL
+        Protocol: sqs
+        Endpoint:
+          Fn::GetAtt: [AppointmentQueueCL, Arn]
+        FilterPolicy:
+          countryISO: ["CL"]
+
+    # SQS Queue Policies
+    AppointmentQueuePolicyPE:
+      Type: AWS::SQS::QueuePolicy
+      Properties:
+        Queues:
+          - Ref: AppointmentQueuePE
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: sns.amazonaws.com
+              Action: sqs:SendMessage
+              Resource:
+                Fn::GetAtt: [AppointmentQueuePE, Arn]
+              Condition:
+                ArnEquals:
+                  aws:SourceArn:
+                    Ref: AppointmentTopicPE
+
+    AppointmentQueuePolicyCL:
+      Type: AWS::SQS::QueuePolicy
+      Properties:
+        Queues:
+          - Ref: AppointmentQueueCL
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: sns.amazonaws.com
+              Action: sqs:SendMessage
+              Resource:
+                Fn::GetAtt: [AppointmentQueueCL, Arn]
+              Condition:
+                ArnEquals:
+                  aws:SourceArn:
+                    Ref: AppointmentTopicCL
+
+    # EventBridge
+    AppointmentEventBridge:
+      Type: AWS::Events::EventBus
+      Properties:
+        Name: ${self:provider.environment.EVENT_BRIDGE_BUS}
+
+    # EventBridge Rule to SQS (CORREGIDO)
+    AppointmentConfirmationRule:
+      Type: AWS::Events::Rule
+      Properties:
+        EventBusName:
+          Ref: AppointmentEventBridge
+        EventPattern:
+          source: ["appointment.service"]
+          detail-type: ["Appointment Confirmed"]
+        State: ENABLED
+        Targets:
+          - Arn:
+              Fn::GetAtt: [ConfirmationQueue, Arn]
+            Id: "ConfirmationQueueTarget"
+            # Eliminado SqsParameters con MessageGroupId para cola estándar
+
+    # EventBridge to SQS Permission (CORREGIDO)
+    EventBridgeToSQSPolicy:
+      Type: AWS::SQS::QueuePolicy
+      Properties:
+        Queues:
+          - Ref: ConfirmationQueue
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: events.amazonaws.com
+              Action: sqs:SendMessage
+              Resource:
+                Fn::GetAtt: [ConfirmationQueue, Arn]
+              Condition:
+                ArnEquals:
+                  aws:SourceArn:
+                    Ref: AppointmentConfirmationRule
+
+  Outputs:
+    AppointmentsTableName:
+      Value:
+        Ref: AppointmentsTable
+      Export:
+        Name: ${self:service}-${self:provider.stage}-appointments-table
+
+    AppointmentTopicPEArn:
+      Value:
+        Ref: AppointmentTopicPE
+      Export:
+        Name: ${self:service}-${self:provider.stage}-topic-pe-arn
+
+    AppointmentTopicCLArn:
+      Value:
+        Ref: AppointmentTopicCL
+      Export:
+        Name: ${self:service}-${self:provider.stage}-topic-cl-arn
+
+    EventBridgeBusName:
+      Value:
+        Ref: AppointmentEventBridge
+      Export:
+        Name: ${self:service}-${self:provider.stage}-eventbridge-bus

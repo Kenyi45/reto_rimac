@@ -1,0 +1,56 @@
+{
+  "name": "rimac-appointment-backend",
+  "version": "1.0.0",
+  "description": "Sistema de agendamiento de citas médicas para asegurados - Reto Técnico Rimac",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "deploy": "serverless deploy",
+    "deploy:dev": "serverless deploy --stage dev",
+    "deploy:prod": "serverless deploy --stage prod",
+    "remove": "serverless remove",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.0.0",
+    "@aws-sdk/client-eventbridge": "^3.0.0",
+    "@aws-sdk/client-sns": "^3.0.0",
+    "@aws-sdk/client-sqs": "^3.0.0",
+    "@aws-sdk/lib-dynamodb": "^3.0.0",
+    "aws-lambda": "^1.0.7",
+    "joi": "^17.9.0",
+    "mysql2": "^3.6.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.119",
+    "@types/jest": "^29.5.4",
+    "@types/node": "^20.5.0",
+    "@types/uuid": "^9.0.2",
+    "@typescript-eslint/eslint-plugin": "^6.4.0",
+    "@typescript-eslint/parser": "^6.4.0",
+    "eslint": "^8.47.0",
+    "jest": "^29.6.2",
+    "serverless": "^3.34.0",
+    "serverless-dotenv-plugin": "^6.0.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.1.6"
+  },
+  "author": "Rimac Backend Team",
+  "license": "MIT",
+  "keywords": [
+    "serverless",
+    "aws",
+    "typescript",
+    "nodejs",
+    "rimac",
+    "appointment",
+    "medical",
+    "swagger",
+    "api-documentation"
+  ]
+}

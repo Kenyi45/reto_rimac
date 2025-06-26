@@ -1,0 +1,256 @@
+openapi: 3.0.0
+info:
+  title: Rimac Appointment API
+  description: Sistema de agendamiento de citas médicas para asegurados de Rimac
+  version: 1.0.0
+  contact:
+    name: Rimac Backend Team
+    email: backend@rimac.com
+  license:
+    name: MIT
+    
+servers:
+  - url: https://guhnek2pq7.execute-api.us-east-1.amazonaws.com/dev
+    description: Servidor de desarrollo
+
+paths:
+  /appointment:
+    post:
+      summary: Crear nueva cita médica
+      description: Crea una nueva cita médica para un asegurado
+      tags:
+        - Citas
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppointmentRequest'
+            examples:
+              peru_example:
+                summary: Cita para Perú
+                value:
+                  insuredId: "00123"
+                  scheduleId: 100
+                  countryISO: "PE"
+              chile_example:
+                summary: Cita para Chile
+                value:
+                  insuredId: "00456"
+                  scheduleId: 200
+                  countryISO: "CL"
+      responses:
+        '200':
+          description: Cita creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentResponse'
+              example:
+                success: true
+                message: "El agendamiento está en proceso"
+                data:
+                  appointmentId: "550e8400-e29b-41d4-a716-446655440000"
+                  status: "pending"
+                  insuredId: "00123"
+                  scheduleId: 100
+                  countryISO: "PE"
+                  createdAt: "2024-03-15T10:30:00.000Z"
+        '400':
+          description: Datos de solicitud inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: "Datos de solicitud inválidos"
+                error: "El campo insuredId es requerido"
+        '409':
+          description: Conflicto - Ya existe una cita para el horario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: "Conflicto en la solicitud"
+                error: "Ya existe una cita para el horario seleccionado"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /appointment/{insuredId}:
+    get:
+      summary: Obtener citas de un asegurado
+      description: Recupera todas las citas de un asegurado específico
+      tags:
+        - Citas
+      parameters:
+        - name: insuredId
+          in: path
+          required: true
+          description: ID del asegurado (5 dígitos)
+          schema:
+            type: string
+            pattern: '^\d{5}$'
+            example: "00123"
+      responses:
+        '200':
+          description: Lista de citas del asegurado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentListResponse'
+              example:
+                success: true
+                data:
+                  - id: "550e8400-e29b-41d4-a716-446655440000"
+                    insuredId: "00123"
+                    scheduleId: 100
+                    countryISO: "PE"
+                    status: "completed"
+                    createdAt: "2024-03-15T10:30:00.000Z"
+                    updatedAt: "2024-03-15T11:00:00.000Z"
+                total: 1
+        '400':
+          description: ID de asegurado inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No se encontraron citas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentListResponse'
+              example:
+                success: true
+                data: []
+                total: 0
+
+components:
+  schemas:
+    AppointmentRequest:
+      type: object
+      required:
+        - insuredId
+        - scheduleId
+        - countryISO
+      properties:
+        insuredId:
+          type: string
+          pattern: '^\d{5}$'
+          description: ID del asegurado (5 dígitos)
+          example: "00123"
+        scheduleId:
+          type: integer
+          minimum: 1
+          description: ID del horario disponible
+          example: 100
+        countryISO:
+          type: string
+          enum: ["PE", "CL"]
+          description: Código ISO del país
+          example: "PE"
+
+    AppointmentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "El agendamiento está en proceso"
+        data:
+          $ref: '#/components/schemas/Appointment'
+
+    AppointmentListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Appointment'
+        total:
+          type: integer
+          example: 1
+
+    Appointment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID único de la cita
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        insuredId:
+          type: string
+          pattern: '^\d{5}$'
+          description: ID del asegurado
+          example: "00123"
+        scheduleId:
+          type: integer
+          description: ID del horario
+          example: 100
+        countryISO:
+          type: string
+          enum: ["PE", "CL"]
+          description: Código ISO del país
+          example: "PE"
+        status:
+          type: string
+          enum: ["pending", "processing", "completed", "cancelled", "failed"]
+          description: Estado de la cita
+          example: "pending"
+        createdAt:
+          type: string
+          format: date-time
+          description: Fecha de creación
+          example: "2024-03-15T10:30:00.000Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Fecha de última actualización
+          example: "2024-03-15T10:30:00.000Z"
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Error en la solicitud"
+        error:
+          type: string
+          description: Descripción detallada del error
+          example: "El campo insuredId es requerido"
+
+  examples:
+    CreateAppointmentPE:
+      summary: Crear cita en Perú
+      value:
+        insuredId: "00123"
+        scheduleId: 100
+        countryISO: "PE"
+    
+    CreateAppointmentCL:
+      summary: Crear cita en Chile
+      value:
+        insuredId: "00456"
+        scheduleId: 200
+        countryISO: "CL"
+
+tags:
+  - name: Citas
+    description: Operaciones relacionadas con el agendamiento de citas médicas 

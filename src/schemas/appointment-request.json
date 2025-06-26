@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "title": "AppointmentRequest",
+  "description": "Solicitud para crear una nueva cita médica",
+  "required": [
+    "insuredId",
+    "scheduleId", 
+    "countryISO"
+  ],
+  "properties": {
+    "insuredId": {
+      "type": "string",
+      "pattern": "^\\d{5}$",
+      "description": "Código del asegurado de 5 dígitos (puede tener ceros por delante)"
+    },
+    "scheduleId": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Identificador del espacio para agendar una cita (centro médico, especialidad, médico y fecha/hora)"
+    },
+    "countryISO": {
+      "type": "string",
+      "enum": ["PE", "CL"],
+      "description": "Identificador de país. Solo puede ser PE (Perú) o CL (Chile)"
+    }
+  },
+  "additionalProperties": false
+} 
