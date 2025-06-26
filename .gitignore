@@ -1,216 +1,159 @@
-# Dependencies
+# ==================================================
+# NODE.JS / NPM
+# ==================================================
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.npm
+.yarn-integrity
 
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Coverage directory used by tools like istanbul
-coverage/
-.coverage/
-*.lcov
-
-# nyc test coverage
-.nyc_output
-
-# Dependency directories
-node_modules/
-jspm_packages/
-
-# TypeScript compiled output
+# ==================================================
+# TYPESCRIPT COMPILATION
+# ==================================================
 dist/
 build/
 *.tsbuildinfo
+src/**/*.js
+src/**/*.js.map
 
-# Optional npm cache directory
-.npm
-
-# Optional REPL history
-.node_repl_history
-
-# Output of 'npm pack'
-*.tgz
-
-# Yarn Integrity file
-.yarn-integrity
-
-# dotenv environment variables file
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-.env.*.local
-
-# IDE/Editor files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Serverless directories
+# ==================================================
+# SERVERLESS FRAMEWORK
+# ==================================================
 .serverless/
 .serverless_nextjs/
-
-# AWS SAM
-.aws-sam/
-
-# Webpack
 .webpack/
 
-# ESLint cache
-.eslintcache
-
-# Prettier
-.prettierignore
-
-# Jest
-jest.config.js.bak
-
-# Logs
-logs
-*.log
-
-# Runtime data
-pids
-*.pid
-*.seed
-
-# Coverage reports
-coverage
-.coverage
-
-# Dependency lock files (keep one, remove others)
-# package-lock.json
-# yarn.lock
-
-# Local development
-.env.development
-.env.local
-
-# Production
-.env.production
-
-# Debug logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Serverless Framework
-.serverless
-
-# AWS CloudFormation templates
+# Serverless deployment artifacts
 cloudformation-template-*.json
-sam-template.yaml
+serverless-state.json
+
+# ==================================================
+# AWS SPECIFIC
+# ==================================================
+# AWS credentials (NEVER commit these)
+.aws/
+aws-exports.js
 
 # Local DynamoDB
 .dynamodb/
 
-# Terraform
-*.tfstate
-*.tfstate.*
-.terraform/
+# AWS SAM
+.aws-sam/
 
-# Docker
-Dockerfile.local
-docker-compose.override.yml
+# ==================================================
+# ENVIRONMENT VARIABLES
+# ==================================================
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.*.local
 
-# Temporary files
-tmp/
-temp/
+# Environment template example (keep this)
+!env.example
 
-# Cache
-.cache/
+# ==================================================
+# TESTING & COVERAGE
+# ==================================================
+coverage/
+.coverage/
+*.lcov
+.nyc_output
+test-results/
+jest.config.js.bak
 
-# AWS credentials (never commit these)
-.aws/
-aws-exports.js
+# ==================================================
+# LINTING & FORMATTING
+# ==================================================
+.eslintcache
 
-# Local SSL certificates
-*.pem
-*.key
-*.crt
-
-# Backup files
-*.bak
-*.backup
-
-# Performance monitoring
-.clinic/
-
-# Documentation build
-docs/build/
-
-# MacOS
-.AppleDouble
-.LSOverride
-
-# Windows
-Desktop.ini
-$RECYCLE.BIN/
-
-# Linux
-*~
-.nfs*
-
-# JetBrains IDEs
-.idea/
-*.iml
-*.ipr
-*.iws
-
+# ==================================================
+# IDE / EDITOR SPECIFIC
+# ==================================================
 # Visual Studio Code
 .vscode/
 !.vscode/settings.json
-!.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
 
-# Sublime Text
-*.sublime-project
-*.sublime-workspace
+# JetBrains IDEs
+.idea/
 
 # Vim
 *.swp
 *.swo
 
-# Archive files
-*.zip
-*.tar.gz
-*.rar
+# ==================================================
+# OS GENERATED FILES
+# ==================================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
 
-# Test artifacts
-test-results/
-e2e-results/
+# Windows
+Thumbs.db
+Desktop.ini
+$RECYCLE_BIN/
 
-# API keys and sensitive data
-secrets.json
-config/secrets.json
-.secrets
+# Linux
+*~
+.nfs*
 
-# Build artifacts
-*.map
-*.min.js
-*.min.css
+# ==================================================
+# LOGS
+# ==================================================
+logs/
+*.log
 
-# CDK
-cdk.out/
+# ==================================================
+# TEMPORARY & CACHE FILES
+# ==================================================
+tmp/
+temp/
+.cache/
 
-# Custom
-local-test-data/
-temp-scripts/ 
+# ==================================================
+# BACKUP FILES
+# ==================================================
+*.bak
+*.backup
+
+# ==================================================
+# DEPLOYMENT SPECIFIC
+# ==================================================
+# Keep deployment scripts
+!deploy.ps1
+!scripts/
+
+# Deployment artifacts that change
+deployment-*.json
+
+# ==================================================
+# DOCUMENTATION BUILD
+# ==================================================
+# Keep source documentation
+!README.md
+!ARCHITECTURE.md
+!QUICK-DEPLOY.md
+!REFACTOR-SUMMARY.md
+!swagger.yaml
+
+# Generated documentation
+docs/build/
+
+# ==================================================
+# PROJECT SPECIFIC
+# ==================================================
+# Keep compiled JS handlers (these are needed for deployment)
+!appointment.js
+!appointmentCL.js
+!appointmentPE.js
+!documentation.js
+
+# Ignore any other compiled JS files in root
+/*.js
+!jest.config.js
+!tsconfig.json
