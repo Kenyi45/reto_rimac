@@ -39,7 +39,7 @@ const swaggerHTML = `<!DOCTYPE html>
                     "description": "Sistema de agendamiento de citas médicas para asegurados de Rimac",
                     "version": "1.0.0"
                 },
-                "servers": [{"url": "https://guhnek2pq7.execute-api.us-east-1.amazonaws.com/dev"}],
+                "servers": [{"url": "https://ppsr3rlfn0.execute-api.us-east-1.amazonaws.com/dev"}],
                 "paths": {
                     "/appointment": {
                         "post": {

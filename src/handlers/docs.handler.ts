@@ -40,7 +40,7 @@ const swaggerHTML = `
                 },
                 "servers": [
                     {
-                        "url": "https://guhnek2pq7.execute-api.us-east-1.amazonaws.com/dev",
+                        "url": "https://ppsr3rlfn0.execute-api.us-east-1.amazonaws.com/dev",
                         "description": "Servidor de desarrollo"
                     }
                 ],

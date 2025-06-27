@@ -44,12 +44,12 @@ aws-exports.js
 # ==================================================
 # ENVIRONMENT VARIABLES
 # ==================================================
-.env
-.env.local
-.env.development
-.env.test
-.env.production
-.env.*.local
+# .env
+# .env.local
+# .env.development
+# .env.test
+# .env.production
+# .env.*.local
 
 # Environment template example (keep this)
 !env.example

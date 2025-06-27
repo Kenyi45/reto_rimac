@@ -93,6 +93,13 @@ async function handleHttpRequest(
   console.log(`HTTP Request: ${method} ${path}`);
 
   try {
+    // Handle OPTIONS requests for CORS
+    if (method === 'OPTIONS') {
+      return createResponse(200, {
+        message: 'CORS preflight successful'
+      });
+    }
+    
     if (method === 'POST' && path === '/appointment') {
       return await handleCreateAppointment(event, service);
     } else if (method === 'GET' && path.startsWith('/appointment/')) {
